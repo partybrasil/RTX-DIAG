@@ -1491,7 +1491,7 @@ class RTXDiagApp(QMainWindow):
         left_scroll_widget = QWidget()
         scroll_layout = QVBoxLayout(left_scroll_widget)
         
-        # Fan section - Dynamic fan count
+        # Fan section - Replace animated fans with metric widgets
         fans_group = QGroupBox("Cooling System")
         fans_group.setStyleSheet("""
             QGroupBox {
@@ -1510,14 +1510,26 @@ class RTXDiagApp(QMainWindow):
             }
         """)
         
-        fans_layout = QHBoxLayout(fans_group)
+        # Create a grid layout for fan metrics
+        fans_layout = QGridLayout(fans_group)
         fans_layout.setSpacing(15)
+        fans_layout.setContentsMargins(15, 20, 15, 15)
         
-        # Initialize with default fan count, will be updated when data arrives
-        self.fans = []
-        self.fan_rpm_labels = []
-        self.fan_speed_labels = []
+        # Initialize fan widgets storage
+        self.fan_speed_widgets = []
+        self.fan_rpm_widgets = []
+        self.fan_temp_widgets = []
         self.fans_layout = fans_layout
+        
+        # Define colors for different fans
+        self.fan_colors = [
+            "#00BCD4",  # Cyan for Fan 1
+            "#4CAF50",  # Green for Fan 2  
+            "#FF9800",  # Orange for Fan 3
+            "#9C27B0",  # Purple for Fan 4
+            "#E91E63",  # Pink for Fan 5
+            "#607D8B"   # Blue Grey for Fan 6
+        ]
         
         scroll_layout.addWidget(fans_group)
         
@@ -1607,12 +1619,14 @@ class RTXDiagApp(QMainWindow):
         self.gpu_name_label.setText(f"Error: {error_message}")
         
     def setup_fans(self, fan_count):
-        """Setup fan widgets based on actual fan count"""
-        # Clear existing fans
-        for fan in self.fans:
-            fan.setParent(None)
-        for label in self.fan_rpm_labels:
-            label.setParent(None)
+        """Setup fan metric widgets based on actual fan count"""
+        # Clear existing fan widgets
+        for widget in self.fan_speed_widgets:
+            widget.setParent(None)
+        for widget in self.fan_rpm_widgets:
+            widget.setParent(None)
+        for widget in self.fan_temp_widgets:
+            widget.setParent(None)
         
         # Clear layout
         while self.fans_layout.count():
@@ -1622,60 +1636,64 @@ class RTXDiagApp(QMainWindow):
             elif child.layout():
                 self.clear_layout(child.layout())
         
-        self.fans = []
-        self.fan_rpm_labels = []
-        self.fan_speed_labels = []  # Add speed percentage labels
+        self.fan_speed_widgets = []
+        self.fan_rpm_widgets = []
+        self.fan_temp_widgets = []
         
-        # Create new fans
+        # Calculate grid layout (2 columns for up to 6 fans)
+        cols = 2
+        rows = (fan_count + 1) // 2
+        
+        # Create fan metric widgets
         for i in range(fan_count):
-            fan_container = QVBoxLayout()
-            fan_widget = FanWidget(f"Fan {i+1}")
-            self.fans.append(fan_widget)
+            fan_color = self.fan_colors[i % len(self.fan_colors)]
             
-            # Fan speed percentage label
-            fan_speed_label = QLabel("0%")
-            fan_speed_label.setAlignment(Qt.AlignCenter)
-            fan_speed_label.setStyleSheet("""
-                QLabel {
-                    color: #00BCD4;
-                    font-size: 10px;
-                    font-weight: bold;
-                    margin-top: 3px;
-                }
-            """)
-            self.fan_speed_labels.append(fan_speed_label)
+            # Fan Speed Progress Bar
+            fan_speed_widget = ProgressBarWidget(
+                f"Fan {i+1} Speed", 
+                100, 
+                fan_color
+            )
+            self.fan_speed_widgets.append(fan_speed_widget)
             
-            # Fan RPM label
-            fan_rpm_label = QLabel("0 RPM")
-            fan_rpm_label.setAlignment(Qt.AlignCenter)
-            fan_rpm_label.setStyleSheet("""
-                QLabel {
-                    color: white;
-                    font-size: 11px;
-                    font-weight: bold;
-                    margin-top: 1px;
-                }
-            """)
-            self.fan_rpm_labels.append(fan_rpm_label)
+            # Fan RPM Metric
+            fan_rpm_widget = MetricWidget(
+                f"Fan {i+1} RPM", 
+                "--", 
+                "RPM", 
+                fan_color
+            )
+            self.fan_rpm_widgets.append(fan_rpm_widget)
             
-            # Fan status label
-            fan_status_label = QLabel("Active")
-            fan_status_label.setAlignment(Qt.AlignCenter)
-            fan_status_label.setStyleSheet("""
-                QLabel {
-                    color: #4CAF50;
-                    font-size: 8px;
-                    margin-top: 1px;
-                }
-            """)
-            # Store reference for status updates
-            setattr(self, f'fan_{i+1}_status_label', fan_status_label)
+            # Calculate grid position
+            row = i // cols
+            col = (i % cols) * 2  # Each fan takes 2 columns (speed + rpm)
             
-            fan_container.addWidget(fan_widget)
-            fan_container.addWidget(fan_speed_label)
-            fan_container.addWidget(fan_rpm_label)
-            fan_container.addWidget(fan_status_label)
-            self.fans_layout.addLayout(fan_container)
+            # Add widgets to grid
+            self.fans_layout.addWidget(fan_speed_widget, row, col)
+            self.fans_layout.addWidget(fan_rpm_widget, row, col + 1)
+        
+        # Add fan summary if more than 3 fans
+        if fan_count > 3:
+            # Overall cooling efficiency widget
+            self.cooling_efficiency_widget = ProgressBarWidget(
+                "Cooling Efficiency", 
+                100, 
+                "#00E676"  # Light green
+            )
+            
+            # Average fan speed widget  
+            self.avg_fan_speed_widget = MetricWidget(
+                "Average Speed", 
+                "--", 
+                "%", 
+                "#00E676"
+            )
+            
+            # Add summary widgets at the bottom
+            summary_row = rows
+            self.fans_layout.addWidget(self.cooling_efficiency_widget, summary_row, 0)
+            self.fans_layout.addWidget(self.avg_fan_speed_widget, summary_row, 1)
     
     def clear_layout(self, layout):
         """Recursively clear a layout"""
@@ -1689,7 +1707,7 @@ class RTXDiagApp(QMainWindow):
     def update_gpu_data(self, data):
         # Setup fans if count changed
         fan_count = data.get('fan_count', 1)
-        if len(self.fans) != fan_count:
+        if len(self.fan_speed_widgets) != fan_count:
             self.setup_fans(fan_count)
         
         # Update GPU name with RTX validation indicator
@@ -1750,11 +1768,14 @@ class RTXDiagApp(QMainWindow):
         if 'gpu_clock_max' in data:
             self.gpu_clock_max_widget.update_value(data['gpu_clock_max'])
             
-        # Update individual fans with their specific speeds and RPMs
+        # Update individual fan metrics
         fan_speeds = data.get('fan_speeds', [])
         fan_rpms = data.get('fan_rpms', [])
         
-        for i, fan in enumerate(self.fans):
+        total_speed = 0
+        active_fans = 0
+        
+        for i in range(len(self.fan_speed_widgets)):
             # Get individual fan data
             if i < len(fan_speeds) and i < len(fan_rpms):
                 fan_speed = fan_speeds[i]
@@ -1764,56 +1785,34 @@ class RTXDiagApp(QMainWindow):
                 fan_speed = data.get('fan_speed', 0)
                 fan_rpm = data.get('fan_rpm', 0)
             
-            # Update fan animation
-            fan.set_rpm(fan_rpm)
+            # Update fan speed progress bar
+            if i < len(self.fan_speed_widgets):
+                self.fan_speed_widgets[i].update_value(int(fan_speed))
             
-            # Update speed percentage label
-            if i < len(self.fan_speed_labels):
-                self.fan_speed_labels[i].setText(f"{fan_speed:.0f}%")
+            # Update fan RPM metric
+            if i < len(self.fan_rpm_widgets):
+                self.fan_rpm_widgets[i].update_value(f"{fan_rpm}")
             
-            # Update RPM label
-            if i < len(self.fan_rpm_labels):
-                self.fan_rpm_labels[i].setText(f"{fan_rpm} RPM")
+            # Calculate totals for summary
+            total_speed += fan_speed
+            if fan_rpm > 0:
+                active_fans += 1
+        
+        # Update summary widgets if they exist
+        if hasattr(self, 'cooling_efficiency_widget') and len(fan_speeds) > 0:
+            avg_speed = total_speed / len(fan_speeds)
+            max_temp = data.get('temperature', 0)
             
-            # Update fan status
-            status_label = getattr(self, f'fan_{i+1}_status_label', None)
-            if status_label:
-                if fan_rpm == 0:
-                    status_label.setText("Zero RPM")
-                    status_label.setStyleSheet("""
-                        QLabel {
-                            color: #FFC107;
-                            font-size: 8px;
-                            margin-top: 1px;
-                        }
-                    """)
-                elif fan_rpm < 500:
-                    status_label.setText("Low Speed")
-                    status_label.setStyleSheet("""
-                        QLabel {
-                            color: #2196F3;
-                            font-size: 8px;
-                            margin-top: 1px;
-                        }
-                    """)
-                elif fan_rpm > 2000:
-                    status_label.setText("High Speed")
-                    status_label.setStyleSheet("""
-                        QLabel {
-                            color: #FF5722;
-                            font-size: 8px;
-                            margin-top: 1px;
-                        }
-                    """)
-                else:
-                    status_label.setText("Active")
-                    status_label.setStyleSheet("""
-                        QLabel {
-                            color: #4CAF50;
-                            font-size: 8px;
-                            margin-top: 1px;
-                        }
-                    """)
+            # Calculate cooling efficiency (inverse relationship with temperature)
+            # Efficiency = (100 - normalized_temp) * (avg_speed / 100)
+            normalized_temp = min(max_temp / 90 * 100, 100)  # Normalize to 90°C max
+            efficiency = max(0, (100 - normalized_temp) * (avg_speed / 100))
+            
+            self.cooling_efficiency_widget.update_value(int(efficiency))
+            
+        if hasattr(self, 'avg_fan_speed_widget') and len(fan_speeds) > 0:
+            avg_speed = total_speed / len(fan_speeds)
+            self.avg_fan_speed_widget.update_value(f"{avg_speed:.0f}")
             
         # Update GPU features panel with current GPU name
         gpu_name = data.get('name', 'Unknown GPU')
@@ -1855,4 +1854,5 @@ def main():
     sys.exit(app.exec())
 
 if __name__ == '__main__':
+    main()
     main()
