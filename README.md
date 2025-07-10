@@ -127,7 +127,7 @@ RTX Diagnostic Tool is a powerful, real-time monitoring application specifically
 
 ```bash
 # Clone the repository
-git clone https://github.com/YourUsername/RTX-DIAG.git
+git clone https://github.com/partybrasil/RTX-DIAG.git
 cd RTX-DIAG
 
 # Install required dependencies
@@ -166,6 +166,8 @@ PySide6==6.9.1
 ### Interface Overview
 
 ```
+
+
 ┌─────────────────────────────────────────────────────────────┐
 │  RTX Diagnostic Dashboard              ✓ RTX 4090 Detected  │
 ├─────────────────────────────────┬───────────────────────────┤
@@ -348,7 +350,7 @@ python RTX-DIAG.py
 
 ### Getting Help
 
-1. **Check Issues**: Browse existing [GitHub Issues](https://github.com/YourUsername/RTX-DIAG/issues)
+1. **Check Issues**: Browse existing [GitHub Issues](https://github.com/partybrasil/RTX-DIAG/issues)
 2. **Create Issue**: Report bugs with system details
 3. **Community**: Join discussions and share experiences
 4. **Documentation**: Review this README and inline help
@@ -382,7 +384,7 @@ python RTX-DIAG.py
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/partybrasil/RTX-DIAG?tab=MIT-1-ov-file#readme "go to MIT LICENSE") file for details.
 
 ---
 
@@ -413,7 +415,7 @@ We extend our heartfelt gratitude to:
 - **PySide6** - Qt for Python UI framework
 - **GitHub** - Hosting and collaboration platform
 
-### Made with ❤️ by the Community
+### Made with ❤️ by PartyBrasil
 
 This tool is built with passion for PC gaming, professional workstations, and the amazing RTX ecosystem. Every line of code is written with care to provide you with the best GPU monitoring experience possible.
 
@@ -425,11 +427,11 @@ This tool is built with passion for PC gaming, professional workstations, and th
 
 **⭐ If you find this tool useful, please consider starring the repository! ⭐**
 
-[![GitHub stars](https://img.shields.io/github/stars/YourUsername/RTX-DIAG?style=social)](https://github.com/YourUsername/RTX-DIAG/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/YourUsername/RTX-DIAG?style=social)](https://github.com/YourUsername/RTX-DIAG/network)
+[![GitHub stars](https://img.shields.io/github/stars/partybrasil/RTX-DIAG?style=social)](https://github.com/partybrasil/RTX-DIAG/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/partybrasil/RTX-DIAG?style=social)](https://github.com/partybrasil/RTX-DIAG/network)
 
 **Built with 💚 for the RTX community**
 
-[🏠 Home](https://github.com/YourUsername/RTX-DIAG) • [📋 Issues](https://github.com/YourUsername/RTX-DIAG/issues) • [🚀 Releases](https://github.com/YourUsername/RTX-DIAG/releases) • [📖 Wiki](https://github.com/YourUsername/RTX-DIAG/wiki)
+[🏠 Home](https://github.com/partybrasil/RTX-DIAG) • [📋 Issues](https://github.com/partybrasil/RTX-DIAG/issues) • [🚀 Releases](https://github.com/partybrasil/RTX-DIAG/releases) • [📖 Wiki](https://github.com/partybrasil/RTX-DIAG/wiki)
 
 </div>
