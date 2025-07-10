@@ -283,7 +283,7 @@ We welcome contributions to improve RTX Diagnostic Tool! Here's how you can help
 
 ```bash
 # Fork and clone the repository
-git clone https://github.com/YourUsername/RTX-DIAG.git
+git clone https://github.com/partybrasil/RTX-DIAG.git
 cd RTX-DIAG
 
 # Create virtual environment
@@ -383,22 +383,6 @@ python RTX-DIAG.py
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-```
-MIT License
-
-Copyright (c) 2024 RTX Diagnostic Tool Contributors
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-```
 
 ---
 
